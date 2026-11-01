@@ -1,0 +1,28 @@
+services:
+  wordpress:
+    image: wordpress:6-apache
+    depends_on:
+      - db
+    cpus: 1.0
+    mem_limit: 512m
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wp
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_CONFIG_EXTRA: |
+        if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { $$_SERVER['HTTPS'] = 'on'; }
+    volumes:
+      - ./.stack-data/wordpress:/var/www/html
+
+  db:
+    image: mariadb:11
+    cpus: 0.5
+    mem_limit: 512m
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wp
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - ./.stack-data/db:/var/lib/mysql
